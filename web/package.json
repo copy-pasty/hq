@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@phosphor-icons/react": "2.0.15",
     "class-variance-authority": "0.7.0",
     "clsx": "2.0.0",
     "next": "14.0.3",

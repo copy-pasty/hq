@@ -2,13 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
+:root,
 body {
-  background: theme("backgroundColor.neutral.950");
-  color: theme("textColor.neutral.200");
+  background: theme("backgroundColor.black");
+  color: theme("textColor.white");
   letter-spacing: theme("letterSpacing.tight");
+  letter-spacing: -0.0275em;
 }
 
 ::selection {
-  background: theme("backgroundColor.neutral.700");
+  background: theme("backgroundColor.neutral.600");
 }

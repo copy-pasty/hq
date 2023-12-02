@@ -1,0 +1,31 @@
+{
+  "name": "@copypasty/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "class-variance-authority": "0.7.0",
+    "clsx": "2.0.0",
+    "next": "14.0.3",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwind-merge": "2.1.0",
+    "zod": "3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "20.10.2",
+    "@types/react": "18.2.41",
+    "@types/react-dom": "18.2.17",
+    "autoprefixer": "10.4.16",
+    "eslint-config-copypasty": "workspace:*",
+    "postcss": "8.4.32",
+    "tailwindcss": "3.3.5",
+    "tsconfig": "workspace:*",
+    "typescript": "5.3.2"
+  }
+}

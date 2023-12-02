@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "eslint": "8.55.0",
+    "prettier": "3.1.0",
+    "tsconfig": "workspace:*",
+    "turbo": "1.10.16"
+  },
+  "packageManager": "pnpm@8.11.0"
+}

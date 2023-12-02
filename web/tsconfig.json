@@ -1,9 +1,5 @@
 {
   "extends": "tsconfig/nextjs.json",
-  "compilerOptions": {
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
-  },
   "include": [
     "next-env.d.ts",
     "./**/*.ts",

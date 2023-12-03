@@ -1,0 +1,52 @@
+---
+title: InferResponseData<T>
+description: standardised type-safe Next.js response on the client with zod or Valibot schema
+tags: ["Next.js", "TypeScript", "zod", "Valibot"]
+createdAt: 2023-12-03
+---
+
+## Who is this for?
+
+This is for you if you want to:
+- have a standardised response type for your Next.js API routes (duh)
+- infer the response data and error types from your route handlers
+- use zod or Valibot schema to validate your response data
+- potentially use react-query or SWR without tRPC while still utilizing RSCs
+
+## Why?
+
+When you don't want to use tRPC, it might be useful to have a standardised response type for your Next.js API routes - or any other server response for that matter. That way you can infer the response data and error types from your route handlers (even on the client). This is useful if some parts of your app have to be client-side rendered, due to e.g. local storage state use that couldn't be persisted in the URL.
+
+```ts
+// ResponseData.ts
+
+import type { NextResponse } from "next/server";
+
+/**
+ * Infer the response data from a route handler.
+ *
+ * Response data should adhere to the following format:
+ *  - `{ ok: true; data: any }`
+ *  - `{ ok: false; error: any }`
+ */
+export type InferResponseData<T extends (...args: any) => unknown> = T extends (
+  ...args: any
+) => infer X
+  ? X extends Promise<NextResponse<infer U>>
+    ? U extends ResponseData
+      ? U
+      : never
+    : never
+  : never;
+
+export type ResponseData<Data = unknown, Error = unknown> =
+  | { ok: true; data: Data }
+  | { ok: false; error: Error };
+
+export type InferResponseOkData<T> = T extends {
+  ok: true;
+  data: infer U;
+}
+  ? U
+  : never;
+```

@@ -1,6 +1,4 @@
 {
-  "name": "@copypasty/web",
-  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,16 +7,23 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@codesandbox/sandpack-react": "2.10.0",
     "@phosphor-icons/react": "2.0.15",
     "class-variance-authority": "0.7.0",
     "clsx": "2.0.0",
+    "contentlayer": "0.3.4",
+    "highlight.js": "11.9.0",
     "next": "14.0.3",
+    "next-contentlayer": "0.3.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "rehype-highlight": "7.0.0",
     "tailwind-merge": "2.1.0",
+    "undici": "5.28.2",
     "zod": "3.22.4"
   },
   "devDependencies": {
+    "@types/mdx": "2.0.10",
     "@types/node": "20.10.2",
     "@types/react": "18.2.41",
     "@types/react-dom": "18.2.17",

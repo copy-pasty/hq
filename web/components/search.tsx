@@ -35,7 +35,13 @@ export function Search(
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          router.push(`${pathname}?${createQueryString("q", value)}` as Route);
+          const query = createQueryString("q", value);
+
+          if (["/"].includes(pathname)) {
+            router.push(`${pathname}?${query}` as Route);
+          } else {
+            router.push(`/?${query}` as Route);
+          }
         }}
       >
         <input

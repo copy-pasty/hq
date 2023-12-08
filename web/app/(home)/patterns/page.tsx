@@ -1,7 +1,13 @@
 // eslint-disable-next-line import/no-unresolved
 import { allPatterns } from "contentlayer/generated";
+import type { Metadata } from "next";
 
 import { ContentLink } from "../../../components/content-link";
+
+export const metadata: Metadata = {
+  title: "patterns",
+  description: "cutting-edge, dev-focused patterns",
+};
 
 export default function PatternsPage() {
   return (

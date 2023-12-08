@@ -6,7 +6,6 @@
 body {
   background: theme("backgroundColor.black");
   color: theme("textColor.white");
-  letter-spacing: theme("letterSpacing.tight");
   letter-spacing: -0.0275em;
 }
 

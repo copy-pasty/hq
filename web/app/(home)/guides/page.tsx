@@ -1,7 +1,13 @@
 // eslint-disable-next-line import/no-unresolved
 import { allGuides } from "contentlayer/generated";
+import type { Metadata } from "next";
 
 import { ContentLink } from "../../../components/content-link";
+
+export const metadata: Metadata = {
+  title: "guides",
+  description: "expert guides for modern dev challenges",
+};
 
 export default function GuidesPage() {
   return (

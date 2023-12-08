@@ -1,0 +1,12 @@
+{
+  "name": "copy pasty",
+  "short_name": "copy pasty",
+  "description": "composable libraries, patterns and guides with best-in-class DX",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000",
+  "icons": [
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

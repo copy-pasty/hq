@@ -1,7 +1,10 @@
 // eslint-disable-next-line import/no-unresolved
 import { allPatterns } from "contentlayer/generated";
+import type { ServerRuntime } from "next";
 
 import { PatternLink } from "../../components/pattern-link";
+
+export const runtime: ServerRuntime = "edge";
 
 export default function HomePage(props: { searchParams: { q?: string } }) {
   const q = props.searchParams.q?.toLowerCase();

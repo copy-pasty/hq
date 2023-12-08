@@ -1,10 +1,10 @@
 "use client";
 
-import { MagnifyingGlass } from "@phosphor-icons/react";
+import { KeyReturn, MagnifyingGlass } from "@phosphor-icons/react";
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { DetailedHTMLProps, InputHTMLAttributes } from "react";
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useId, useState } from "react";
 
 import { cn } from "../cn";
 
@@ -52,13 +52,18 @@ export function Search(
           }}
         />
 
-        <MagnifyingGlass className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 group-hover:text-white group-active:text-white peer-focus:text-white" />
+        <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 group-hover:text-white group-active:text-white peer-focus:text-white">
+          <MagnifyingGlass className="h-4 w-4" />
+        </div>
 
         <label
           htmlFor={id}
-          className="absolute right-2 top-1/2 ml-4 flex h-6 -translate-y-1/2 select-none items-center justify-center rounded-md border border-neutral-600 px-1.5 text-sm text-neutral-400 hover:text-white active:text-white"
+          className="absolute right-2 top-1/2 ml-4 flex h-6 -translate-y-1/2 select-none items-center justify-center rounded-md border border-neutral-600 px-1.5 text-sm text-neutral-400 hover:text-white active:text-white group-focus-within:border-transparent"
         >
-          /
+          <div className="hidden group-focus-within:block">
+            <KeyReturn className="h-5 w-5" />
+          </div>
+          <div className="block group-focus-within:hidden">/</div>
         </label>
       </form>
     </div>

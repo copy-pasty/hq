@@ -1,0 +1,236 @@
+---
+title: apiClient()
+description: Type-safe fetch() and modern Axios replacement
+tags: ["Web", "TypeScript", "Axios"]
+createdAt: 2023-12-03
+---
+
+## Who is this for?
+
+This is for you if you want to:
+
+- have a type-safe fetch() replacement
+- have a modern Axios replacement
+- have a replacement for other non-standard fetch() wrappers
+
+## Why?
+
+- fetch() is not type-safe and defaults can sometimes be annoying
+- Axios (<a target="_blank" href="https://axios-http.com" className="text-neutral-400 hover:text-white focus:text-white">https://axios-http.com</a>) use unnecessary dependencies for modern projects and introduces overhead with non-standard APIs
+
+## How? <span className='text-neutral-400 font-normal text-base'>(2 steps)</span>
+
+tl;dr copy-paste <span className='text-neutral-400'>apiClient.ts</span> from below and fetch anything you want with <span className='text-neutral-400'>apiClient()</span> either on the client or server.
+
+### 1. Copy-paste <span className='text-neutral-400'>apiClient.ts</span>
+
+#### 1.1 Non-standard responses (default)
+
+````ts
+// apiClient.ts
+
+type ApiClient = <Data>(
+  input: RequestInfo | URL,
+  init?: (Omit<RequestInit, "body"> & { body?: object }) | undefined
+) => Promise<Data>;
+
+/**
+ * Type-safe `fetch` with good defaults
+ *
+ * @example
+ * ```ts
+ * const data = await apiClient<string>("/api/ping");
+ * console.log(data); // => "pong"
+ * ```
+ */
+export const apiClient = new Proxy(fetch, {
+  async apply(
+    target,
+    thisArg,
+    args: [input: RequestInfo | URL, init?: RequestInit | undefined]
+  ) {
+    const [url, init] = args;
+
+    let headers = new Headers(init?.headers);
+
+    if (init?.body && !(init?.body instanceof FormData)) {
+      headers = new Headers({
+        "Content-Type": "application/json",
+        ...init?.headers,
+      });
+    }
+
+    const nextInit = {
+      ...init,
+      headers,
+      credentials: "include",
+    } satisfies RequestInit;
+
+    if (init?.body && !(init?.body instanceof FormData)) {
+      nextInit.body = JSON.stringify(init?.body);
+    }
+
+    const response = await target.apply(thisArg, [
+      `${getBaseUrl()}${String(url)}`,
+      nextInit,
+    ]);
+
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
+    const results = await response.json();
+
+    if (!results.ok) {
+      throw new Error(results.error);
+    }
+
+    return results.data;
+  },
+}) as ApiClient;
+
+// taken from https://trpc.io/docs/client/nextjs/setup#4-create-trpc-hooks
+function getBaseUrl() {
+  if (typeof window !== "undefined") {
+    // browser should use relative path
+    return "";
+  }
+
+  if (process.env.VERCEL_URL) {
+    // reference for vercel.com
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  if (process.env.RENDER_INTERNAL_HOSTNAME) {
+    // reference for render.com
+    return `http://${process.env.RENDER_INTERNAL_HOSTNAME}:${process.env.PORT}`;
+  }
+
+  // assume localhost
+  return `http://localhost:${process.env.PORT ?? 3000}`;
+}
+````
+
+#### 1.2 Standard responses (optional)
+
+Automatically infer the response ok data from a route handler. This point uses a pattern described here [InferResponseData\<T> - Standardised type-safe Next.js response on the client](/patterns/infer-response-data).
+
+````ts
+// apiClient.ts
+
+import type { InferResponseOkData, ResponseData } from "./ResponseData";
+
+type ApiClient = <Data = ResponseData>(
+  input: RequestInfo | URL,
+  init?: (Omit<RequestInit, "body"> & { body?: object }) | undefined
+) => Promise<InferResponseOkData<Data>>;
+
+/**
+ * Type-safe `fetch` with good defaults
+ *
+ * @example
+ * ```ts
+ * const data = await apiClient<{ ok: true; data: string } | { ok: false; error: string }>("/api/ping");
+ * console.log(data); // => "pong"
+ * ```
+ */
+export const apiClient = new Proxy(fetch, {
+  async apply(
+    target,
+    thisArg,
+    args: [input: RequestInfo | URL, init?: RequestInit | undefined]
+  ) {
+    const [url, init] = args;
+
+    let headers = new Headers(init?.headers);
+
+    if (init?.body && !(init?.body instanceof FormData)) {
+      headers = new Headers({
+        "Content-Type": "application/json",
+        ...init?.headers,
+      });
+    }
+
+    const nextInit = {
+      ...init,
+      headers,
+      credentials: "include",
+    } satisfies RequestInit;
+
+    if (init?.body && !(init?.body instanceof FormData)) {
+      nextInit.body = JSON.stringify(init?.body);
+    }
+
+    const response = (await target.apply(thisArg, [
+      `${getBaseUrl()}${String(url)}`,
+      nextInit,
+    ])) as Response;
+
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
+    const results = (await response.json()) as ResponseData;
+
+    if (!results.ok) {
+      throw new Error(results.error);
+    }
+
+    return results.data;
+  },
+}) as ApiClient;
+
+// taken from https://trpc.io/docs/client/nextjs/setup#4-create-trpc-hooks
+function getBaseUrl() {
+  if (typeof window !== "undefined") {
+    // browser should use relative path
+    return "";
+  }
+
+  if (process.env.VERCEL_URL) {
+    // reference for vercel.com
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  if (process.env.RENDER_INTERNAL_HOSTNAME) {
+    // reference for render.com
+    return `http://${process.env.RENDER_INTERNAL_HOSTNAME}:${process.env.PORT}`;
+  }
+
+  // assume localhost
+  return `http://localhost:${process.env.PORT ?? 3000}`;
+}
+````
+
+```ts
+// ResponseData.ts
+
+import type { NextResponse } from "next/server";
+
+/**
+ * Infer the response data from a route handler.
+ *
+ * Response data should adhere to the following format:
+ *  - `{ ok: true; data: unknown }`
+ *  - `{ ok: false; error: unknown }`
+ */
+export type InferResponseData<T extends (...args: unknown[]) => unknown> =
+  T extends (...args: unknown[]) => infer X
+    ? X extends Promise<NextResponse<infer U>>
+      ? U extends ResponseData
+        ? U
+        : never
+      : never
+    : never;
+
+export type ResponseData<Data = unknown, Error = unknown> =
+  | { ok: true; data: Data }
+  | { ok: false; error: Error };
+
+export type InferResponseOkData<T> = T extends {
+  ok: true;
+  data: infer U;
+}
+  ? U
+  : never;
+```

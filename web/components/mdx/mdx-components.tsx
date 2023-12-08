@@ -7,12 +7,16 @@ import { CopyHeadingLink } from "./copy-heading-link";
 
 export const mdxComponents: MDXComponents = {
   a: ({ href, children, ...props }) => (
-    <Link {...props} href={href as Route}>
+    <Link
+      {...props}
+      href={href as Route}
+      className="text-neutral-400 hover:text-white focus:text-white"
+    >
       {children}
     </Link>
   ),
   h1: ({ id, children }) => (
-    <div className="relative w-fit">
+    <div className="group relative w-fit">
       <Link
         href={`#${id}`}
         className="relative block w-fit items-center justify-center hover:text-neutral-400 focus:text-neutral-400"
@@ -25,7 +29,7 @@ export const mdxComponents: MDXComponents = {
     </div>
   ),
   h2: ({ id, children }) => (
-    <div className="relative w-fit">
+    <div className="group relative w-fit">
       <Link
         href={`#${id}`}
         className="relative block w-fit items-center justify-center hover:text-neutral-400 focus:text-neutral-400"
@@ -38,7 +42,7 @@ export const mdxComponents: MDXComponents = {
     </div>
   ),
   h3: ({ id, children }) => (
-    <div className="relative w-fit">
+    <div className="group relative w-fit">
       <Link
         href={`#${id}`}
         className="block w-fit items-center justify-center hover:text-neutral-400 focus:text-neutral-400"
@@ -51,7 +55,7 @@ export const mdxComponents: MDXComponents = {
     </div>
   ),
   h4: ({ id, children }) => (
-    <div className="relative w-fit">
+    <div className="group relative w-fit">
       <Link
         href={`#${id}`}
         className="block w-fit items-center justify-center hover:text-neutral-400 focus:text-neutral-400"

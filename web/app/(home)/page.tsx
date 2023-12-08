@@ -1,28 +1,20 @@
 // eslint-disable-next-line import/no-unresolved
-import { allPatterns } from "contentlayer/generated";
+import type { Guide, Pattern } from "contentlayer/generated";
+// eslint-disable-next-line import/no-unresolved
+import { allGuides, allPatterns } from "contentlayer/generated";
 import type { ServerRuntime } from "next";
 
-import { PatternLink } from "../../components/pattern-link";
+import { ContentLink } from "../../components/content-link";
 
 export const runtime: ServerRuntime = "edge";
 
 export default function HomePage(props: { searchParams: { q?: string } }) {
   const q = props.searchParams.q?.toLowerCase();
-  const allPatternsFiltered = allPatterns.filter((pattern) => {
-    if (!q) {
-      return true;
-    }
-
-    return (
-      pattern.title.toLowerCase().includes(q) ||
-      pattern.description.toLowerCase().includes(q) ||
-      pattern.tags?.some((tag) => tag.toLowerCase().includes(q))
-    );
-  });
+  const filteredContent = getFilteredContent(q);
 
   return (
     <div className="flex flex-col gap-2">
-      {allPatternsFiltered.length === 0 && q && (
+      {filteredContent.length === 0 && q && (
         <div className="flex w-full flex-col items-center justify-center text-center">
           <p className="text-lg">
             No results for "<span className="font-medium">{q}</span>"
@@ -34,24 +26,55 @@ export default function HomePage(props: { searchParams: { q?: string } }) {
         </div>
       )}
 
-      {allPatternsFiltered.length > 0 && q && (
+      {filteredContent.length > 0 && q && (
         <p className="text-neutral-400">
-          {allPatternsFiltered.length}{" "}
-          {allPatternsFiltered.length === 1 ? "result" : "results"} for{" "}
+          {filteredContent.length}{" "}
+          {filteredContent.length === 1 ? "result" : "results"} for{" "}
           <span className="font-medium">"{q}"</span>
         </p>
       )}
 
       <div className="flex gap-2">
-        {allPatternsFiltered
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )
-          .map((pattern) => (
-            <PatternLink key={pattern._id} pattern={pattern} />
-          ))}
+        {filteredContent.map((content) => (
+          <ContentLink key={content._id} content={content} />
+        ))}
       </div>
     </div>
+  );
+}
+
+function getFilteredContent(search?: string) {
+  if (!search) {
+    return [...allPatterns, ...allGuides].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+  const content: (Guide | Pattern)[] = [];
+
+  allPatterns.forEach((pattern) => {
+    if (
+      pattern.type.toLocaleLowerCase().includes(search) ||
+      pattern.title.toLowerCase().includes(search) ||
+      pattern.description.toLowerCase().includes(search) ||
+      pattern.tags?.some((tag) => tag.toLowerCase().includes(search))
+    ) {
+      content.push(pattern);
+    }
+  });
+
+  allGuides.forEach((guide) => {
+    if (
+      guide.type.toLocaleLowerCase().includes(search) ||
+      guide.title.toLowerCase().includes(search) ||
+      guide.description.toLowerCase().includes(search) ||
+      guide.tags?.some((tag) => tag.toLowerCase().includes(search))
+    ) {
+      content.push(guide);
+    }
+  });
+
+  return content.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 }

@@ -2,7 +2,7 @@ import "highlight.js/styles/vs2015.min.css";
 
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 // eslint-disable-next-line import/no-unresolved
-import { allPatterns } from "contentlayer/generated";
+import { allGuides } from "contentlayer/generated";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMDXComponent } from "next-contentlayer/hooks";
@@ -10,35 +10,35 @@ import { getMDXComponent } from "next-contentlayer/hooks";
 import { mdxComponents } from "../../../../components/mdx/mdx-components";
 
 export function generateStaticParams() {
-  return allPatterns.map((pattern) => ({
-    slug: pattern._raw.flattenedPath.split("patterns/").join(""),
+  return allGuides.map((guide) => ({
+    slug: guide._raw.flattenedPath.split("guides/").join(""),
   }));
 }
 
 export function generateMetadata({ params }: { params: { slug: string } }) {
-  const pattern = allPatterns.find(
-    (pattern) =>
-      pattern._raw.flattenedPath.split("patterns/").join("") === params.slug
+  const guide = allGuides.find(
+    (guide) =>
+      guide._raw.flattenedPath.split("guides/").join("") === params.slug
   );
 
-  if (!pattern) {
-    throw new Error(`Pattern ${params.slug} not found`);
+  if (!guide) {
+    throw new Error(`Guide ${params.slug} not found`);
   }
 
-  return { title: pattern.title, description: pattern.description };
+  return { title: guide.title, description: guide.description };
 }
 
 export default function GuidePage({ params }: { params: { slug: string } }) {
-  const pattern = allPatterns.find(
-    (pattern) =>
-      pattern._raw.flattenedPath.split("patterns/").join("") === params.slug
+  const guide = allGuides.find(
+    (guide) =>
+      guide._raw.flattenedPath.split("guides/").join("") === params.slug
   );
 
-  if (!pattern) {
+  if (!guide) {
     return notFound();
   }
 
-  const MDXContent = getMDXComponent(pattern.body.code);
+  const MDXContent = getMDXComponent(guide.body.code);
 
   return (
     <div>
@@ -52,20 +52,20 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
         <ArrowRight />
 
         <Link
-          href="/patterns"
+          href="/guides"
           className="flex items-center justify-center text-neutral-400 hover:text-white focus:text-white"
         >
-          patterns
+          guides
         </Link>
         <ArrowRight />
 
-        <p>{pattern.title}</p>
+        <p>{guide.title}</p>
       </div>
 
       <article className="mx-auto my-24 max-w-3xl">
-        <h1 className="text-xl font-medium leading-relaxed">{pattern.title}</h1>
+        <h1 className="text-xl font-medium leading-relaxed">{guide.title}</h1>
         <h2 className="text-sm leading-relaxed text-neutral-400">
-          {pattern.description}
+          {guide.description}
         </h2>
 
         <div className="mt-24">

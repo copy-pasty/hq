@@ -29,7 +29,7 @@ export function CopyHeadingLink(props: { id?: string }) {
 
   return (
     <button
-      className="absolute left-full top-0.5 ml-1 flex h-8 items-center justify-center rounded-md p-2 font-sans text-xs text-neutral-400 hover:bg-neutral-600 hover:text-white focus:bg-neutral-600 focus:text-white"
+      className="absolute left-full top-0.5 ml-1 flex h-8 items-center justify-center gap-1 rounded-md p-2 font-sans text-xs text-neutral-400 opacity-0 hover:bg-neutral-600 hover:text-white focus:bg-neutral-600 focus:text-white group-focus-within:opacity-100 group-hover:opacity-100"
       onClick={copy}
     >
       <Link className="h-4 w-4" />

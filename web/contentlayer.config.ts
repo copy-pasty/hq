@@ -4,7 +4,7 @@ import rehypeSlug from "rehype-slug";
 
 export const Pattern = defineDocumentType(() => ({
   name: "Pattern",
-  filePathPattern: `**/*.mdx`,
+  filePathPattern: `./patterns/*.mdx`,
   contentType: "mdx",
   fields: {
     title: { type: "string", required: true },
@@ -16,14 +16,33 @@ export const Pattern = defineDocumentType(() => ({
   computedFields: {
     url: {
       type: "string",
-      resolve: (pattern) => `/patterns/${pattern._raw.flattenedPath}`,
+      resolve: (pattern) => `/${pattern._raw.flattenedPath}`,
+    },
+  },
+}));
+
+export const Guide = defineDocumentType(() => ({
+  name: "Guide",
+  filePathPattern: `./guides/*.mdx`,
+  contentType: "mdx",
+  fields: {
+    title: { type: "string", required: true },
+    description: { type: "string", required: true },
+    createdAt: { type: "date", required: true },
+    updatedAt: { type: "date", required: false },
+    tags: { type: "list", of: { type: "string" }, required: true },
+  },
+  computedFields: {
+    url: {
+      type: "string",
+      resolve: (guide) => `/${guide._raw.flattenedPath}`,
     },
   },
 }));
 
 export default makeSource({
-  contentDirPath: "./app/(home)/patterns",
-  documentTypes: [Pattern],
+  contentDirPath: "./app/(home)",
+  documentTypes: [Pattern, Guide],
   mdx: {
     rehypePlugins: [highlight as any, rehypeSlug],
   },

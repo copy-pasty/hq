@@ -1,12 +1,12 @@
 // eslint-disable-next-line import/no-unresolved
-import { allPatterns } from "contentlayer/generated";
+import { allGuides } from "contentlayer/generated";
 
 import { ContentLink } from "../../../components/content-link";
 
-export default function PatternsPage() {
+export default function GuidesPage() {
   return (
     <div className="flex gap-2">
-      {allPatterns
+      {allGuides
         .sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()

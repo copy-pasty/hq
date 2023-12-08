@@ -11,7 +11,11 @@ export default function PatternsPage() {
   return (
     <div className="flex gap-2">
       {sortedPatterns.map((pattern) => (
-        <PatternLink key={pattern._id} pattern={pattern} />
+        <PatternLink
+          key={pattern._id}
+          pattern={pattern}
+          showOwnTypeTag={false}
+        />
       ))}
     </div>
   );

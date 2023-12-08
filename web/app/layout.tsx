@@ -4,8 +4,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import type { PropsWithChildren } from "react";
 
-import { SandpackStyles } from "./sandpack-styles";
-
 export const metadata: Metadata = {
   title: "copy pasty",
   description:
@@ -20,9 +18,9 @@ const inter = Inter({
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang="en" className={inter.className}>
-      <head>
+      {/* <head>
         <SandpackStyles />
-      </head>
+      </head> */}
       <body>{children}</body>
     </html>
   );

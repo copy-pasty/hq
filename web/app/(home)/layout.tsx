@@ -81,7 +81,7 @@ function Header() {
 function LogoHeader() {
   return (
     <div className="w-fit rounded-3xl border-2 border-neutral-700 p-4 px-5">
-      <Link href="/" className="group w-fit">
+      <Link href="/" className="group block max-w-fit">
         <h1 className="flex items-center gap-2 leading-relaxed group-hover:text-neutral-400">
           <Logo />
           copy pasty

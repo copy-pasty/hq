@@ -13,10 +13,10 @@ export function PatternLink({
     <article className="flex flex-col gap-2">
       <Link
         href={pattern.url as Route}
-        className="group max-w-sm rounded-3xl border-2 border-neutral-700 p-4 px-5 hover:bg-neutral-900"
+        className="group max-w-sm rounded-3xl border-2 border-neutral-700 p-3.5 px-5 hover:bg-neutral-900"
       >
         <div>
-          <h3 className="font-medium leading-loose">{pattern.title}</h3>
+          <h3 className="font-medium leading-relaxed">{pattern.title}</h3>
           <h4 className="text-sm leading-relaxed text-neutral-400 group-hover:text-white">
             {pattern.description}
           </h4>

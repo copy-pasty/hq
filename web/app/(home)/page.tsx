@@ -13,7 +13,7 @@ export default function HomePage(props: { searchParams: { q?: string } }) {
   const filteredContent = getFilteredContent(q);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 max-sm:gap-6">
       {filteredContent.length === 0 && q && (
         <div className="flex w-full flex-col items-center justify-center text-center">
           <p className="text-lg">
@@ -34,7 +34,7 @@ export default function HomePage(props: { searchParams: { q?: string } }) {
         </p>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2 max-sm:gap-6">
         {filteredContent.map((content) => (
           <ContentLink key={content._id} content={content} />
         ))}

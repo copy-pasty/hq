@@ -10,7 +10,7 @@ export default function Layout(props: PropsWithChildren) {
     <>
       <Header />
 
-      <div className="m-6 flex flex-col gap-6">
+      <div className="m-6 flex flex-col gap-6 max-sm:m-2">
         <hr className="w-full border-neutral-800" />
         <main>{props.children}</main>
       </div>
@@ -21,7 +21,7 @@ export default function Layout(props: PropsWithChildren) {
 function Header() {
   return (
     <>
-      <header className="m-6 flex flex-wrap justify-between gap-2">
+      <header className="m-6 flex flex-wrap justify-between gap-2 max-sm:m-2">
         <div className="flex w-fit flex-col gap-2">
           <LogoHeader />
 

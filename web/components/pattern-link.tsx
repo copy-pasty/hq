@@ -25,9 +25,12 @@ export function PatternLink({
 
       <div className="flex items-center gap-1">
         {showOwnTypeTag && (
-          <p className="border-pattern-500 bg-pattern-500/30 rounded-xl border px-2 py-1 text-xs text-neutral-400">
+          <Link
+            href="/patterns"
+            className="border-pattern-500 bg-pattern-500/30 hover:bg-pattern-500/50 focus:bg-pattern-500/50 rounded-xl border px-2 py-1 text-xs text-neutral-400 hover:text-white focus:text-white"
+          >
             {pattern.type.toLocaleLowerCase()}
-          </p>
+          </Link>
         )}
 
         {pattern.tags.map((tag) => (

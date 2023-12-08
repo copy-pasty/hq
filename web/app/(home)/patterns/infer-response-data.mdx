@@ -1,21 +1,27 @@
 ---
 title: InferResponseData<T>
-description: standardised type-safe Next.js response on the client with zod or Valibot schema
-tags: ["Next.js", "TypeScript", "zod", "Valibot"]
+description: Standardised type-safe Next.js response on the client
+tags: ["Next.js", "TypeScript"]
 createdAt: 2023-12-03
 ---
 
 ## Who is this for?
 
 This is for you if you want to:
+
 - have a standardised response type for your Next.js API routes (duh)
 - infer the response data and error types from your route handlers
-- use zod or Valibot schema to validate your response data
-- potentially use react-query or SWR without tRPC while still utilizing RSCs
+- potentially use <a target="_blank" href='https://tanstack.com/query/latest' className='text-neutral-400 hover:text-white focus:text-white'>react-query</a> or <a target="_blank" href='https://swr.vercel.app' className='text-neutral-400 hover:text-white focus:text-white'>SWR</a> without tRPC while still utilizing RSCs
 
 ## Why?
 
-When you don't want to use tRPC, it might be useful to have a standardised response type for your Next.js API routes - or any other server response for that matter. That way you can infer the response data and error types from your route handlers (even on the client). This is useful if some parts of your app have to be client-side rendered, due to e.g. local storage state use that couldn't be persisted in the URL.
+When you don't want to use tRPC, it might be useful to have a standardised response type for your Next.js API routes - or any other server response for that matter. That way you can infer the response data and error types from your route handlers - even on the client. This is useful if some parts of your app have to be client-side rendered, due to e.g. local storage state use that couldn't be persisted in the URL.
+
+## How? <span className='text-neutral-400 font-normal text-base'>(3 steps)</span>
+
+tl;dr copy-paste <span className='text-neutral-400'>ResponseData.ts</span> from below, add <span className='text-neutral-400'>as const</span> to your response data and use <span className='text-neutral-400'>InferResponseData</span> to infer the response data type from your route handler.
+
+### 1. Create a ResponseData type
 
 ```ts
 // ResponseData.ts
@@ -26,18 +32,17 @@ import type { NextResponse } from "next/server";
  * Infer the response data from a route handler.
  *
  * Response data should adhere to the following format:
- *  - `{ ok: true; data: any }`
- *  - `{ ok: false; error: any }`
+ *  - `{ ok: true; data: unknown }`
+ *  - `{ ok: false; error: unknown }`
  */
-export type InferResponseData<T extends (...args: any) => unknown> = T extends (
-  ...args: any
-) => infer X
-  ? X extends Promise<NextResponse<infer U>>
-    ? U extends ResponseData
-      ? U
+export type InferResponseData<T extends (...args: unknown[]) => unknown> =
+  T extends (...args: unknown[]) => infer X
+    ? X extends Promise<NextResponse<infer U>>
+      ? U extends ResponseData
+        ? U
+        : never
       : never
-    : never
-  : never;
+    : never;
 
 export type ResponseData<Data = unknown, Error = unknown> =
   | { ok: true; data: Data }
@@ -49,4 +54,101 @@ export type InferResponseOkData<T> = T extends {
 }
   ? U
   : never;
+```
+
+### 2. Infer the response data type from your route handler
+
+```ts
+// app/api/todos/route.ts
+
+import { NextResponse } from "next/server";
+import type { InferResponseData } from "...";
+import { listTodos } from "./listTodos";
+
+export type ListTodosResponseData = InferResponseData<typeof GET>;
+export async function GET(request: NextRequest) {
+  try {
+    return NextResponse.json({ ok: true, data: await listTodos() } as const, {
+      status: 200,
+    });
+  } catch (error) {
+    return NextResponse.json({ ok: false, error: error.message } as const, {
+      status: error.statusCode ?? 500,
+    });
+  }
+}
+```
+
+NOTE: If you fetch the data only client-side (<a target="_blank" href='https://tanstack.com/query/latest' className='text-neutral-400 hover:text-white focus:text-white'>react-query</a> or <a target="_blank" href='https://swr.vercel.app' className='text-neutral-400 hover:text-white focus:text-white'>SWR</a>) instead of using RSCs, you don't really have to define your functions separately. But depending on your use-case it might be a good idea to do so anyway.
+
+```ts
+// app/api/todos/listTodos.ts
+
+import { db } from "...";
+import { cache } from "react";
+
+export const listTodos = cache(async () => {
+  return await db.selectFrom("todos").selectAll().limit(500).execute();
+});
+```
+
+### 3. Use the response data type in your components
+
+#### 3.1. (client-side) Using react-query
+
+```tsx
+// app/todos/react-query/page.tsx
+
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { getBaseUrl } from "...";
+// make sure to import the type using "import type"
+// otherwise it will be imported at runtime and throw an error
+import type { ListTodosResponseData } from "../../../api/todos/route";
+
+export default function TodosReactQueryPage() {
+  const todos = useTodos();
+
+  if (todos.isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (todos.error) {
+    return <div>{error}</div>;
+  }
+
+  return (
+    <div>
+      {todos.data.map((todo) => (
+        <div key={todo.id}>{todo.title}</div>
+      ))}
+    </div>
+  );
+}
+
+const useTodos = () => {
+  return useQuery({
+    queryKey: ["todos"],
+    queryFn: async () => {
+      const response = await fetch(`${getBaseUrl()}/api/todos`);
+
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      // might need to actually check if json is of type ResponseData
+      // but you get the idea
+      const results = (await response.json()) as ResponseData;
+
+      if (!results.ok && typeof results.error === "string") {
+        throw new Error(results.error);
+      }
+
+      // again, might need to check if data
+      // is actually of type ListTodosResponseData
+      return results.data as ListTodosResponseData;
+    },
+  });
+};
 ```

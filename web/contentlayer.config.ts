@@ -1,5 +1,6 @@
 import { defineDocumentType, makeSource } from "contentlayer/source-files";
 import highlight from "rehype-highlight";
+import rehypeSlug from "rehype-slug";
 
 export const Pattern = defineDocumentType(() => ({
   name: "Pattern",
@@ -24,6 +25,6 @@ export default makeSource({
   contentDirPath: "./app/(home)/patterns",
   documentTypes: [Pattern],
   mdx: {
-    rehypePlugins: [highlight as any],
+    rehypePlugins: [highlight as any, rehypeSlug],
   },
 });

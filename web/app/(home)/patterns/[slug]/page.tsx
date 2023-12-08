@@ -5,9 +5,9 @@ import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { allPatterns } from "contentlayer/generated";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { useMDXComponent } from "next-contentlayer/hooks";
+import { getMDXComponent } from "next-contentlayer/hooks";
 
-import { mdxComponents } from "../../../mdx-components";
+import { mdxComponents } from "../../../../components/mdx/mdx-components";
 
 export function generateStaticParams() {
   return allPatterns.map((guide) => ({ slug: guide._raw.flattenedPath }));
@@ -34,8 +34,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
     return notFound();
   }
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const MDXContent = useMDXComponent(guide.body.code);
+  const MDXContent = getMDXComponent(guide.body.code);
 
   return (
     <div>

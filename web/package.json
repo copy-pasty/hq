@@ -1,4 +1,5 @@
 {
+  "name": "@copypasty/web",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -13,25 +14,25 @@
     "clsx": "2.0.0",
     "contentlayer": "0.3.4",
     "highlight.js": "11.9.0",
-    "next": "14.0.3",
+    "next": "14.0.4",
     "next-contentlayer": "0.3.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "rehype-highlight": "7.0.0",
+    "rehype-slug": "6.0.0",
     "tailwind-merge": "2.1.0",
-    "undici": "5.28.2",
     "zod": "3.22.4"
   },
   "devDependencies": {
     "@types/mdx": "2.0.10",
-    "@types/node": "20.10.2",
-    "@types/react": "18.2.41",
+    "@types/node": "20.10.4",
+    "@types/react": "18.2.42",
     "@types/react-dom": "18.2.17",
     "autoprefixer": "10.4.16",
     "eslint-config-copypasty": "workspace:*",
     "postcss": "8.4.32",
-    "tailwindcss": "3.3.5",
+    "tailwindcss": "3.3.6",
     "tsconfig": "workspace:*",
-    "typescript": "5.3.2"
+    "typescript": "5.3.3"
   }
 }

@@ -33,6 +33,7 @@ export default async function Image({ params }: { params: { slug: string } }) {
       <OgImageTitleDescription
         title={pattern.title}
         description={pattern.description}
+        type="pattern"
       />
     ),
     {

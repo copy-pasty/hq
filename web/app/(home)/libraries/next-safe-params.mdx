@@ -1,0 +1,525 @@
+---
+title: next-safe-params
+description: Type-safe, Zod-schema based state management with useSearchParams()
+tags: ["Web", "TypeScript", "Zod", "Next.js"]
+createdAt: 2024-09-04
+---
+
+## Who is this for?
+
+This is for you if you want to:
+
+- have a safe (type-safe, validated by <a target="_blank" href="https://zod.dev" className="text-neutral-400 hover:text-white focus:text-white" >Zod</a>) useSearchParams() replacement
+- use URLSearchParams as your state manager
+- standardize your URLSearchParams usage in client and server components
+
+## Why?
+
+- params in useSearchParams() are <span className='text-neutral-400 font-normal text-base'>string | string[] | undefined</span> by default (in both client and server components)
+- using URLSearchParams as a state manager without type-safety can lead to frustrating bugs and hard to manage code
+- nuqs (<a target="_blank" href="https://nuqs.47ng.com" className="text-neutral-400 hover:text-white focus:text-white" >https://nuqs.47ng.com</a>) doesn't support Zod yet so you have to workaround it. It's especially painful when you want to use it with form libraries, like react-hook-form. See <a target="_blank" className="text-neutral-400 hover:text-white focus:text-white" href='https://github.com/47ng/nuqs/discussions/446'>here</a> for Zod RFC and <a className="text-neutral-400 hover:text-white focus:text-white" href='#nuqs-zod-integration'>here</a> for copy-pasteable nuqs Zod helper
+- whole implementation is 265 lines of code that you can tailor to your needs
+
+## How? <span className='text-neutral-400 font-normal text-base'>(1-2 steps)</span>
+
+tl;dr copy-paste <span className='text-neutral-400'>next-safe-param/client.ts</span>
+and <span className='text-neutral-400'>next-safe-param/server.ts</span> from below and use it throughout your client components like usual <span className='text-neutral-400'>const [state, setState] = useState()</span> or use <span className='text-neutral-400'>createSearchParamsContext()</span> context to access safe search params throughout server components without prop drilling.
+
+### 1. Copy-paste <span className='text-neutral-400'>next-safe-param/(client|server).ts</span>
+
+#### 1.1 Client
+
+```ts
+// next-safe-param/client.ts
+
+import type { NavigateOptions } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import {
+  useSearchParams as useNextJsSearchParams,
+  usePathname,
+  useRouter,
+} from "next/navigation";
+import { useCallback, useMemo } from "react";
+import { z } from "zod";
+
+export function createSearchParamsHooks<Schema extends z.AnyZodObject>(
+  schema: Schema
+) {
+  type ParsedParams = z.infer<Schema>;
+
+  return {
+    useSearchParam: <Key extends keyof ParsedParams>(key: Key) =>
+      useSearchParam<Key, Schema["shape"][Key]>(key, schema.shape[key]),
+    useSearchParamState: <Key extends keyof ParsedParams>(key: Key) =>
+      useSearchParamState<Key, Schema["shape"][Key]>(key, schema.shape[key]),
+    useSearchParams: () => useSearchParams(schema),
+    useSearchParamsState: () => useSearchParamsState(schema),
+  };
+}
+
+export function useSearchParam<
+  Key extends PropertyKey,
+  Schema extends ZodPrimitive,
+>(key: Key, schema: Schema) {
+  const unsafeParams = useNextJsSearchParams();
+  const isSchemaArray = useMemo(() => isZodTypeArray(schema), [schema]);
+  return useMemo<z.infer<Schema>>(
+    () =>
+      schema.parse(
+        isSchemaArray
+          ? unsafeParams.getAll(key.toString())
+          : unsafeParams.get(key.toString())
+      ),
+    [isSchemaArray, key, schema, unsafeParams]
+  );
+}
+
+export function useSearchParamState<
+  Key extends PropertyKey,
+  Schema extends ZodPrimitive,
+>(key: Key, schema: Schema) {
+  type ParsedParam = z.infer<Schema>;
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const unsafeParams = useNextJsSearchParams();
+
+  const isSchemaArray = useMemo(() => isZodTypeArray(schema), [schema]);
+  const param = useMemo<ParsedParam>(
+    () =>
+      schema.parse(
+        isSchemaArray
+          ? unsafeParams.getAll(key.toString())
+          : unsafeParams.get(key.toString())
+      ),
+    [isSchemaArray, key, schema, unsafeParams]
+  );
+
+  const setParam = useCallback(
+    (
+      paramOrUpdater: ParsedParam | ((prevState: ParsedParam) => ParsedParam),
+      options?: NavigateOptions & { shallow?: boolean }
+    ) => {
+      const nextParam = schema.parse(
+        paramOrUpdater instanceof Function
+          ? paramOrUpdater(param)
+          : paramOrUpdater
+      );
+      const nextUnsafeParams = new URLSearchParams(unsafeParams);
+
+      changeURLSearchParam(
+        key,
+        nextParam,
+        schema.parse(null),
+        nextUnsafeParams
+      );
+
+      if (options?.shallow) {
+        window.history.replaceState(
+          null,
+          "",
+          `${pathname}?${nextUnsafeParams}`
+        );
+      } else {
+        router.replace(`${pathname}?${nextUnsafeParams}`);
+      }
+    },
+    [param, key, pathname, schema, unsafeParams]
+  );
+
+  return [param, setParam] as const;
+}
+
+export function useSearchParams<Schema extends z.AnyZodObject>(schema: Schema) {
+  const unsafeParams = useNextJsSearchParams();
+  return useMemo<z.infer<Schema>>(
+    () => schema.parse(Object.fromEntries(unsafeParams.entries())),
+    [schema, unsafeParams]
+  );
+}
+
+export function useSearchParamsState<Schema extends z.AnyZodObject>(
+  schema: Schema
+) {
+  type ParsedParams = z.infer<Schema>;
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const unsafeParams = useNextJsSearchParams();
+
+  const params = useMemo<ParsedParams>(
+    () => schema.parse(Object.fromEntries(unsafeParams.entries())),
+    [schema, unsafeParams]
+  );
+
+  const setParams = useCallback(
+    (
+      paramsOrUpdater:
+        | ParsedParams
+        | ((prevState: ParsedParams) => ParsedParams),
+      options?: NavigateOptions & { shallow?: boolean }
+    ) => {
+      const nextParams = schema.parse(
+        paramsOrUpdater instanceof Function
+          ? paramsOrUpdater(params)
+          : paramsOrUpdater
+      );
+      const nextUnsafeParams = new URLSearchParams(unsafeParams);
+
+      for (const [key, nextParam] of Object.entries(nextParams)) {
+        changeURLSearchParam(
+          key,
+          nextParam,
+          schema.shape[key].parse(),
+          nextUnsafeParams
+        );
+      }
+
+      if (options?.shallow) {
+        window.history.replaceState(
+          null,
+          "",
+          `${pathname}?${nextUnsafeParams}`
+        );
+      } else {
+        router.push(`${pathname}?${nextUnsafeParams}`, options);
+      }
+    },
+    [params, pathname, schema, unsafeParams]
+  );
+
+  return [params, setParams] as const;
+}
+
+function changeURLSearchParam<
+  Key extends PropertyKey,
+  Value extends z.infer<ZodPrimitive>,
+>(key: Key, value: Value, defaultValue: Value, params: URLSearchParams) {
+  if (value === undefined || value === null || value === defaultValue) {
+    params.delete(key.toString());
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    params.delete(key.toString());
+    value.forEach((item) => params.append(key.toString(), `${item}`));
+    return;
+  }
+
+  params.set(key.toString(), `${value}`);
+}
+
+export function isZodTypeArray(schema: z.ZodTypeAny): boolean {
+  if (schema instanceof z.ZodArray) {
+    return true;
+  }
+
+  if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
+    return isZodTypeArray(schema.unwrap());
+  }
+
+  if (schema instanceof z.ZodDefault) {
+    return isZodTypeArray(schema._def.innerType);
+  }
+
+  if (schema instanceof z.ZodCatch) {
+    return isZodTypeArray(schema._def.innerType);
+  }
+
+  if (schema instanceof z.ZodEffects) {
+    return isZodTypeArray(schema.innerType());
+  }
+
+  return false;
+}
+
+type ZodPrimitive =
+  | z.ZodString
+  | z.ZodNumber
+  | z.ZodBoolean
+  | z.ZodEnum<[string, ...string[]]>
+  | z.ZodArray<ZodPrimitive>
+  | z.ZodDefault<ZodPrimitive>
+  | z.ZodOptional<ZodPrimitive>
+  | z.ZodNullable<ZodPrimitive>
+  | z.ZodCatch<ZodPrimitive>
+  | z.ZodEffects<ZodPrimitive, any, any>;
+```
+
+**Examples**
+
+##### Scoped
+
+```ts
+// my-search-params.schema.ts
+import { z } from "zod";
+
+// Gotcha here: make sure to define your
+// .default(defaultValue).catch(defaultValue)
+// or
+// .optional() / .nullable() / .nullish()
+export const mySchema = z.object({
+  array: z.string().array().catch([]),
+  enum: z.enum(["you", "should", "read", "brautigan"]).nullable(),
+  someNumber: z.coerce.number().positive().max(127).default(1).catch(1),
+  someString: z.string().default("").catch(""),
+});
+```
+
+```ts
+// my-search-params.client.ts
+import { createSearchParamsHooks } from "../next-safe-params/client";
+import { mySchema } from "./my-search-params.schema";
+
+export const {
+  useSearchParam: useMySearchParam,
+  useSearchParamState: useMySearchParamState,
+  useSearchParams: useMySearchParams,
+  useSearchParamsState: useMySearchParamsState,
+} = createSearchParamsHooks(mySchema);
+```
+
+```tsx
+// page.tsx
+"use client";
+
+import { Suspense } from "react";
+import { useMySearchParamState } from "./my-search-params.client";
+
+export default function Page() {
+  return (
+    <Suspense
+      fallback={
+        <>
+          Remember that Next.js's useSearchParams() might cause component to
+          suspend while rendering statically
+        </>
+      }
+    >
+      <PageMySearchParams />
+    </Suspense>
+  );
+}
+
+function PageMySearchParams() {
+  const myEnum = useMySearchParam("enum");
+  console.log(myEnum);
+
+  const [array, setArray] = useMySearchParamState("array");
+
+  // useSearchParamState is a drop-in replacement for useState
+  // well not really drop-in since you have to specify your
+  // key or schema but still you know what i mean, usual React patterns.
+  function addItemToArray(item: string) {
+    setArray((prev) => [...prev, item]);
+  }
+
+  function removeItemFromArray(item: string) {
+    setArray((prev) => prev.filter((prevItem) => item !== prevItem));
+  }
+
+  return <>Your component here</>;
+}
+```
+
+<br />
+##### Individual
+
+If you need simple state management pass Zod primitive schema to any useSearchParam\* hook. You don't need to export const \{ ... \} = createSearchParamsHooks(schema) everytime. Use it for more complex state management.
+
+```tsx
+// page.tsx
+
+"use client";
+
+import { Suspense } from "react";
+import { z } from "zod";
+import { useSearchParamState } from "../next-safe-params/client";
+
+export default function Page() {
+  return (
+    <Suspense
+      fallback={
+        <>
+          Remember that Next.js's useSearchParams() might cause component to
+          suspend while rendering statically
+        </>
+      }
+    >
+      <PageMySearchParams />
+    </Suspense>
+  );
+}
+
+const myNumberSchema = z.coerce.number().positive().catch(1);
+
+function PageMySearchParams() {
+  const [myNumber, setMyNumber] = useSearchParamState(
+    "myNumber",
+    myNumberSchema
+  );
+
+  // do same state management
+  // as with `useState()`
+
+  return <>Your component here</>;
+}
+```
+
+#### 1.2 Server (optional)
+
+nuqs introduced great pattern to reuse URLSearchParams in a given server component tree. We're going to copy-paste it too. Then just call paramsContext.init(props.searchParams) in your page/layout and use it throughout your server components, like paramsContext.get(paramKey) or paramsContext.getAll().
+
+```ts
+// next-safe-param/server.ts
+
+import type { z } from "zod";
+
+class SearchParamsStoreError extends Error {}
+class SearchParamsStore<ParsedParams> {
+  private readonly storage = new AsyncLocalStorage<ParsedParams>();
+
+  init(params: ParsedParams) {
+    if (this.storage.getStore()) {
+      throw new SearchParamsStoreError(
+        "SearchParamsStore is already initialized"
+      );
+    }
+
+    this.storage.enterWith(params);
+  }
+
+  get<Key extends keyof ParsedParams>(key: Key): ParsedParams[Key] {
+    const params = this.storage.getStore();
+    if (!params) {
+      throw new SearchParamsStoreError("SearchParamsStore is not initialized");
+    }
+
+    return params[key];
+  }
+
+  getAll(): ParsedParams {
+    const params = this.storage.getStore();
+    if (!params) {
+      throw new SearchParamsStoreError("SearchParamsStore is not initialized");
+    }
+
+    return params;
+  }
+}
+
+export function createSearchParamsContext<Schema extends z.AnyZodObject>(
+  schema: Schema
+) {
+  type ParsedParams = z.infer<Schema>;
+  const store = new SearchParamsStore<ParsedParams>();
+
+  return {
+    init: (params: unknown) => {
+      const parsed = schema.safeParse(params);
+      if (!parsed.success) {
+        throw new SearchParamsStoreError("Invalid search params");
+      }
+
+      return store.init.bind(store)(parsed.data);
+    },
+    get: store.get.bind(store),
+    getAll: store.getAll.bind(store),
+  };
+}
+```
+
+```ts
+// my-search-params.ts
+import { createSearchParamsContext } from "../next-safe-params/server";
+import { mySchema } from "./my-search-params.schema";
+
+export const mySearchParamsContext = createSearchParamsContext(mySchema);
+```
+
+```tsx
+// page.tsx
+
+import { mySearchParamsContext } from "./my-search-params";
+
+export default function Page(props: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  mySearchParamsContext.init(props.searchParams);
+
+  return (
+    <div>
+      <pre>{JSON.stringify(mySearchParamsContext.getAll(), null, 2)}</pre>
+      <SomeComponent />
+    </div>
+  );
+}
+
+// Notice no props!
+function SomeComponent() {
+  const someNumber = mySearchParamsContext.get("someNumber");
+
+  // Values are updated if on the client side
+  // you're setting state with { shallow: false } option.
+  // (which is false by default).
+  return <p>Some number is: {someNumber}</p>;
+}
+```
+
+## nuqs Zod integration
+
+If you don't like using your own code (or copy-pasted code), you can install nuqs (<a target="_blank" href="https://nuqs.47ng.com" className="text-neutral-400 hover:text-white focus:text-white" >https://nuqs.47ng.com</a>)
+and copy-paste code below to use nuqs with Zod. Keep in mind the code might now be perfect! I wrote next-safe-params after writing those helpers for nuqs so I didn't spend time perfecting the solution.
+
+```ts
+// nuqs-helpers.ts
+
+import type { ParserBuilder } from "nuqs";
+import { createParser } from "nuqs/server";
+import { z } from "zod";
+
+/**
+ * Takes z.SomeZodObject and returns nuqs's parsers.
+ */
+export function zodToParsers<
+  Schema extends z.SomeZodObject,
+  ReturnType extends {
+    [K in keyof Schema["shape"]]: ParserBuilder<z.infer<Schema["shape"][K]>>;
+  },
+>(zodSchema: Schema): ReturnType {
+  return Object.fromEntries(
+    Object.entries(zodSchema.shape).map(([key, value]) => [
+      key,
+      zodToParser(key, value),
+    ])
+  ) as unknown as ReturnType;
+}
+
+function zodToParser(key: string, zodSchema: z.ZodTypeAny) {
+  let parser = createParser({
+    parse: (v: unknown) => zodSchema.parse(v),
+    serialize: (v: any) => v,
+  });
+
+  let hadDefault = false;
+
+  if (zodSchema instanceof z.ZodDefault) {
+    parser = parser.withDefault(zodSchema._def.defaultValue());
+    hadDefault = true;
+  }
+
+  if (zodSchema instanceof z.ZodCatch) {
+    if (zodSchema._def.innerType instanceof z.ZodDefault) {
+      parser = parser.withDefault(zodSchema._def.innerType._def.defaultValue());
+      hadDefault = true;
+    }
+  }
+
+  if (!hadDefault) {
+    console.warn(
+      `${key} is missing default value. This may cause unexpected behavior.`
+    );
+  }
+
+  return parser;
+}
+```

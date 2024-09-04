@@ -53,7 +53,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
 
         <Link
           href="/patterns"
-          className="flex items-center justify-center text-neutral-400 hover:text-white focus:text-white"
+          className="text-pattern-400 hover:text-pattern-200 focus:text-pattern-200 flex items-center justify-center"
         >
           patterns
         </Link>

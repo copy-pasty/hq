@@ -20,9 +20,9 @@ export default async function Image() {
   return new ImageResponse(
     (
       <OgImageTitleDescription
-        title="patterns"
-        description="cutting-edge, dev-focused code patterns"
-        type="pattern"
+        title="libraries"
+        description="composable libraries with best-in-class DX"
+        type="library"
       />
     ),
     {

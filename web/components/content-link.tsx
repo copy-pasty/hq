@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import type { Guide, Pattern } from "contentlayer/generated";
+import type { Guide, Library, Pattern } from "contentlayer/generated";
 import type { Route } from "next";
 import Link from "next/link";
 
@@ -12,6 +12,8 @@ const variants = cva(
           "border-guide-500 bg-guide-500/30 text-guide-50 hover:bg-guide-500/50 focus:bg-guide-500/50",
         Pattern:
           "border-pattern-500 bg-pattern-500/30 text-pattern-50 hover:bg-pattern-500/50 focus:bg-pattern-500/50",
+        Library:
+          "border-library-500 bg-library-500/30 text-library-50 hover:bg-library-500/50 focus:bg-library-500/50",
       },
     },
   }
@@ -21,14 +23,14 @@ export function ContentLink({
   content,
   showOwnTypeTag = true,
 }: {
-  content: Guide | Pattern;
+  content: Guide | Pattern | Library;
   showOwnTypeTag?: boolean;
 }) {
   return (
     <article className="flex flex-col gap-2">
       <Link
         href={content.url as Route}
-        className="group max-w-sm rounded-3xl border-2 border-neutral-700 p-3.5 px-5 hover:bg-neutral-900"
+        className="group max-w-xs rounded-3xl border-2 border-neutral-700 p-3.5 px-5 hover:bg-neutral-900"
       >
         <div>
           <h3 className="font-medium leading-relaxed">{content.title}</h3>
@@ -41,7 +43,13 @@ export function ContentLink({
       <div className="flex items-center gap-1">
         {showOwnTypeTag && (
           <Link
-            href={content.type === "Guide" ? "/guides" : "/patterns"}
+            href={
+              content.type === "Guide"
+                ? "/guides"
+                : content.type === "Pattern"
+                  ? "/patterns"
+                  : "/libraries"
+            }
             className={variants({ type: content.type })}
           >
             {content.type.toLocaleLowerCase()}

@@ -22,6 +22,7 @@ export default async function Image() {
       <OgImageTitleDescription
         title="patterns"
         description="cutting-edge, dev-focused code patterns"
+        type="pattern"
       />
     ),
     {

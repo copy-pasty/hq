@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-unresolved
-import { allPatterns } from "contentlayer/generated";
+import { allLibraries } from "contentlayer/generated";
 import { ImageResponse } from "next/og";
 
 import { OgImageTitleDescription } from "../../../../components/og/title-description";
@@ -11,13 +11,13 @@ export const alt =
   "copy pasty - composable libraries, patterns and guides with best-in-class DX";
 
 export default async function Image({ params }: { params: { slug: string } }) {
-  const pattern = allPatterns.find(
-    (pattern) =>
-      pattern._raw.flattenedPath.split("patterns/").join("") === params.slug
+  const library = allLibraries.find(
+    (library) =>
+      library._raw.flattenedPath.split("libraries/").join("") === params.slug
   );
 
-  if (!pattern) {
-    throw new Error(`Could not find pattern with slug ${params.slug}`);
+  if (!library) {
+    throw new Error(`Could not find library with slug ${params.slug}`);
   }
 
   const inter = fetch(
@@ -31,9 +31,9 @@ export default async function Image({ params }: { params: { slug: string } }) {
   return new ImageResponse(
     (
       <OgImageTitleDescription
-        title={pattern.title}
-        description={pattern.description}
-        type="pattern"
+        title={library.title}
+        description={library.description}
+        type="library"
       />
     ),
     {

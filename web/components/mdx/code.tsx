@@ -8,7 +8,7 @@ export function Code(props: PropsWithChildren) {
   const ref = useRef<HTMLElement>(null);
 
   return (
-    <div className="relative inline-block w-full max-w-3xl overflow-x-auto rounded-xl bg-neutral-800 p-4 text-neutral-100">
+    <div className="relative inline-block w-full max-w-3xl overflow-x-auto rounded-xl bg-neutral-800 p-4 text-xs leading-normal tracking-normal text-neutral-100">
       <CopyCodeButton innerTextElementRef={ref} />
       <code ref={ref}>{props.children}</code>
     </div>

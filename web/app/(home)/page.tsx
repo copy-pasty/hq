@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-unresolved
-import type { Guide, Pattern } from "contentlayer/generated";
+import type { Guide, Library, Pattern } from "contentlayer/generated";
 // eslint-disable-next-line import/no-unresolved
-import { allGuides, allPatterns } from "contentlayer/generated";
+import { allGuides, allLibraries, allPatterns } from "contentlayer/generated";
 import type { ServerRuntime } from "next";
 
 import { ContentLink } from "../../components/content-link";
@@ -45,12 +45,12 @@ export default function HomePage(props: { searchParams: { q?: string } }) {
 
 function getFilteredContent(search?: string) {
   if (!search) {
-    return [...allPatterns, ...allGuides].sort(
+    return [...allPatterns, ...allGuides, ...allLibraries].sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
-  const content: (Guide | Pattern)[] = [];
+  const content: (Guide | Pattern | Library)[] = [];
 
   allPatterns.forEach((pattern) => {
     if (
@@ -71,6 +71,17 @@ function getFilteredContent(search?: string) {
       guide.tags?.some((tag) => tag.toLowerCase().includes(search))
     ) {
       content.push(guide);
+    }
+  });
+
+  allLibraries.forEach((library) => {
+    if (
+      library.type.toLocaleLowerCase().includes(search) ||
+      library.title.toLowerCase().includes(search) ||
+      library.description.toLowerCase().includes(search) ||
+      library.tags?.some((tag) => tag.toLowerCase().includes(search))
+    ) {
+      content.push(library);
     }
   });
 

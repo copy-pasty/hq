@@ -40,9 +40,28 @@ export const Guide = defineDocumentType(() => ({
   },
 }));
 
+export const Library = defineDocumentType(() => ({
+  name: "Library",
+  filePathPattern: `./libraries/*.mdx`,
+  contentType: "mdx",
+  fields: {
+    title: { type: "string", required: true },
+    description: { type: "string", required: true },
+    createdAt: { type: "date", required: true },
+    updatedAt: { type: "date", required: false },
+    tags: { type: "list", of: { type: "string" }, required: true },
+  },
+  computedFields: {
+    url: {
+      type: "string",
+      resolve: (library) => `/${library._raw.flattenedPath}`,
+    },
+  },
+}));
+
 export default makeSource({
   contentDirPath: "./app/(home)",
-  documentTypes: [Pattern, Guide],
+  documentTypes: [Pattern, Guide, Library],
   mdx: {
     rehypePlugins: [highlight as any, rehypeSlug],
   },

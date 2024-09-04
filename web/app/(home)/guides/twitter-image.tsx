@@ -22,6 +22,7 @@ export default async function Image() {
       <OgImageTitleDescription
         title="guides"
         description="expert guides for modern dev challenges"
+        type="guide"
       />
     ),
     {

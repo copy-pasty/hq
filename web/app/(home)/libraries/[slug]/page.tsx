@@ -2,7 +2,7 @@ import "highlight.js/styles/vs2015.min.css";
 
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 // eslint-disable-next-line import/no-unresolved
-import { allGuides } from "contentlayer/generated";
+import { allLibraries } from "contentlayer/generated";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMDXComponent } from "next-contentlayer/hooks";
@@ -10,35 +10,35 @@ import { getMDXComponent } from "next-contentlayer/hooks";
 import { mdxComponents } from "../../../../components/mdx/mdx-components";
 
 export function generateStaticParams() {
-  return allGuides.map((guide) => ({
-    slug: guide._raw.flattenedPath.split("guides/").join(""),
+  return allLibraries.map((library) => ({
+    slug: library._raw.flattenedPath.split("libraries/").join(""),
   }));
 }
 
 export function generateMetadata({ params }: { params: { slug: string } }) {
-  const guide = allGuides.find(
-    (guide) =>
-      guide._raw.flattenedPath.split("guides/").join("") === params.slug
+  const library = allLibraries.find(
+    (library) =>
+      library._raw.flattenedPath.split("libraries/").join("") === params.slug
   );
 
-  if (!guide) {
+  if (!library) {
     throw new Error(`Guide ${params.slug} not found`);
   }
 
-  return { title: guide.title, description: guide.description };
+  return { title: library.title, description: library.description };
 }
 
 export default function GuidePage({ params }: { params: { slug: string } }) {
-  const guide = allGuides.find(
-    (guide) =>
-      guide._raw.flattenedPath.split("guides/").join("") === params.slug
+  const library = allLibraries.find(
+    (library) =>
+      library._raw.flattenedPath.split("libraries/").join("") === params.slug
   );
 
-  if (!guide) {
+  if (!library) {
     return notFound();
   }
 
-  const MDXContent = getMDXComponent(guide.body.code);
+  const MDXContent = getMDXComponent(library.body.code);
 
   return (
     <div>
@@ -52,20 +52,20 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
         <ArrowRight />
 
         <Link
-          href="/guides"
-          className="text-guide-500 hover:text-guide-200 focus:text-guide-200 flex items-center justify-center"
+          href="/libraries"
+          className="text-library-500 hover:text-library-50 focus:text-library-50 flex items-center justify-center"
         >
-          guides
+          libraries
         </Link>
         <ArrowRight />
 
-        <p>{guide.title}</p>
+        <p>{library.title}</p>
       </div>
 
       <article className="mx-auto my-24 max-w-3xl">
-        <h1 className="text-xl font-medium leading-relaxed">{guide.title}</h1>
+        <h1 className="text-xl font-medium leading-relaxed">{library.title}</h1>
         <h2 className="text-sm leading-relaxed text-neutral-400">
-          {guide.description}
+          {library.description}
         </h2>
 
         <div className="mt-24">

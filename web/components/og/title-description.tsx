@@ -1,6 +1,7 @@
 export function OgImageTitleDescription(props: {
   title: string;
   description: string;
+  type?: "pattern" | "guide" | "library";
 }) {
   return (
     <div
@@ -43,6 +44,12 @@ export function OgImageTitleDescription(props: {
           alignItems: "center",
           justifyContent: "flex-end",
           gap: "1rem",
+          color:
+            props.type === "pattern"
+              ? "#4bafac"
+              : props.type === "guide"
+                ? "#FF6700"
+                : "#DFFF00",
         }}
       >
         <svg

@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-unresolved
-import { allGuides } from "contentlayer/generated";
+import { allLibraries } from "contentlayer/generated";
 import type { Metadata } from "next";
 
 import { ContentLink } from "../../../components/content-link";
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function GuidesPage() {
   return (
     <div className="flex gap-2">
-      {allGuides
+      {allLibraries
         .sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()

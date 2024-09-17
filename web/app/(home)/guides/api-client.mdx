@@ -1,6 +1,6 @@
 ---
 title: apiClient()
-description: Type-safe fetch() and modern Axios replacement
+description: Type-safe fetch() wrapper with good defaults
 tags: ["Web", "TypeScript", "Axios"]
 createdAt: 2023-12-03
 ---
@@ -9,14 +9,15 @@ createdAt: 2023-12-03
 
 This is for you if you want to:
 
-- have a type-safe fetch() replacement
-- have a modern Axios replacement
-- have a replacement for other non-standard fetch() wrappers
+- have a type-safe fetch() wrapper for your API endpoints
+- have a ready-to-use simple API client
+- lower the number of dependencies to manage by replacing other non-standard fetch() wrappers
 
 ## Why?
 
-- fetch() is not type-safe and defaults can sometimes be annoying
-- Axios (<a target="_blank" href="https://axios-http.com" className="text-neutral-400 hover:text-white focus:text-white">https://axios-http.com</a>) use unnecessary dependencies for modern projects and introduces overhead with non-standard APIs
+- fetch() is not type-safe and its defaults can sometimes be annoying
+- Some everything-included popular options like <a target="_blank" href="https://axios-http.com" className="text-neutral-400 hover:text-white focus:text-white">axios</a> bring in multiple dependencies and a lot of extra features you might not need in the first place.
+- Thin fetch wrappers like <a target="_blank" href="https://github.com/sindresorhus/ky" className="text-neutral-400 hover:text-white focus:text-white">ky</a>, <a target="_blank" href="https://better-fetch.vercel.app/" className="text-neutral-400 hover:text-white focus:text-white">better-fetch</a>, <a target="_blank" href="https://github.com/unjs/ofetch" className="text-neutral-400 hover:text-white focus:text-white">ofetch</a> offer mostly the same benefits, but at the cost of an external dependency.
 
 ## How? <span className='text-neutral-400 font-normal text-base'>(2 steps)</span>
 
